@@ -3,10 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Mini App</title>
+    <title>Telegram Web App</title>
 </head>
 <body>
 <h1 id="greeting">Loading...</h1>
-<script src="app.js"></script>
+
+<script>
+  window.Telegram.WebApp.ready();
+
+  const user = window.Telegram.WebApp.initDataUnsafe?.user;
+  const locale = user?.language_code || 'en';
+  const userName = user?.first_name || "User";
+  const userId = user?.id;
+
+  function getVisitCount() {
+    let visitCount = localStorage.getItem('visitCount') || 0;
+    return parseInt(visitCount);
+  }
+
+  function updateVisitCount() {
+    let visitCount = getVisitCount();
+    visitCount += 1;
+    localStorage.setItem('visitCount', visitCount);
+    return visitCount;
+  }
+
+  function getGreetingMessage(name, visits, locale) {
+    if (locale === 'ru' || locale === 'by') {
+      return `Привет, ${name}! Вы посетили эту страницу ${visits} раз(а).`;
+    }
+    return `Hello, ${name}! You have visited this page ${visits} times.`;
+  }
+
+  function detectDebugging() {
+    if (window.location.search || window.location.hash) {
+      window.history.pushState({}, document.title, window.location.pathname);
+      const message = locale === 'ru' ? 'Нельзя подсматривать!' : 'No peeking!';
+      alert(message);
+    }
+  }
+
+  function main() {
+    if (user && userId) {
+      const visitCount = updateVisitCount();
+      const greetingMessage = getGreetingMessage(userName, visitCount, locale);
+      const greetingElement = document.getElementById('greeting');
+      greetingElement.textContent = greetingMessage;
+
+      detectDebugging();
+    }
+  }
+
+  main();
+</script>
 </body>
 </html>

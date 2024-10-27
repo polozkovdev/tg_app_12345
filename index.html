@@ -10,9 +10,10 @@
 
 <script>
   // Проверяем, есть ли объект Telegram WebApp
-  if (window.Telegram && window.Telegram.WebApp) {
+  if (typeof window.Telegram !== 'undefined') {
     // Инициализация Web App
     const telegram = window.Telegram.WebApp;
+    telegram.ready();
 
     telegram.ready();
 

@@ -22,44 +22,46 @@
           document.head.appendChild(script);
         });
       }
-
-      // Функция для проверки попытки дебага
       function checkDebugging() {
         const originalLocation = window.location.href;
-        setInterval(() => {
+
+        // Проверка, если URL меняется
+        window.addEventListener('popstate', () => {
           if (window.location.href !== originalLocation) {
             window.location.href = originalLocation;
             alert("Нельзя подсматривать!");
           }
-        }, 1000);
-      }
+        });
 
+        // Проверка на изменение хеша
+        window.addEventListener('hashchange', () => {
+          if (window.location.href !== originalLocation) {
+            window.location.href = originalLocation;
+            alert("Нельзя подсматривать!");
+          }
+        });
+      }
       loadScript('https://telegram.org/js/telegram-web-app.js')
         .then(() => {
           const app = window.Telegram.WebApp;
 
-          // Проверяем наличие данных
-          console.log(app); // Проверка
+          console.log(app);
           if (app && app.initDataUnsafe && app.initDataUnsafe.user) {
             const user = app.initDataUnsafe.user;
-            const username = user.username || "Неизвестный пользователь";
-            const locale = app.initDataUnsafe.user.language_code; // Получаем локаль пользователя
+            const username = user.username || "Unknown user";
+            const locale = app.initDataUnsafe.user.language_code;
 
-            // Определяем приветствие на основе локали
             const greeting = (locale === 'en') ? `Welcome, ${username}!` : `Добро пожаловать, ${username}!`;
 
-            // Получаем и обновляем количество визитов
             let visitCount = localStorage.getItem('visitCount') || 0;
             visitCount = parseInt(visitCount) + 1;
             localStorage.setItem('visitCount', visitCount);
 
-            // Отображаем приветствие и количество визитов
             document.getElementById('username').innerText = `${greeting} Вы посетили нас ${visitCount} раз(а).`;
           } else {
             document.getElementById('username').innerText = "Не удалось получить имя пользователя.";
           }
 
-          // Изменение цвета фона в зависимости от темы
           if (app && app.colorScheme === 'dark') {
             document.body.style.backgroundColor = '#1c1c1c';
             document.body.style.color = '#ffffff';
@@ -68,7 +70,6 @@
             document.body.style.color = '#000000';
           }
 
-          // Проверка на попытки дебага
           checkDebugging();
         })
         .catch(error => {

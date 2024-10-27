@@ -77,8 +77,7 @@
   window.onload = function () {
     detectDevToolsByResize();
   };
-</script>
-<script>
+
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       const script = document.createElement("script");
@@ -88,30 +87,31 @@
       document.head.appendChild(script);
     });
   }
+
   async function getVisitCount(userId) {
     try {
       const response = await fetch(`/api/visits?userId=${userId}`);
       const data = await response.json();
-      console.log("amount of visits: ", data.visitCount);
       return data.visitCount;
     } catch (error) {
       console.error("Error message: ", error);
       return 0;
     }
   }
+
   async function saveVisitCount(userId) {
     try {
       const response = await fetch(`/api/visits?userId=${userId}`, {
         method: "POST",
       });
       const data = await response.json();
-      console.log("amount of visits: ", data.visitCount);
       return data.visitCount;
     } catch (error) {
       console.error("Error message: ", error);
       return 0;
     }
   }
+
   loadScript("https://telegram.org/js/telegram-web-app.js")
     .then(async () => {
       const app = window.Telegram.WebApp;
@@ -133,20 +133,15 @@
           document.getElementById("username").innerText = "Loading...";
           document.querySelector(".button").innerText = "Refresh";
         }
-        try {
-          let visitCount = await getVisitCount(userId);
-          visitCount++;
 
-          await saveVisitCount(userId);
+        let visitCount = await getVisitCount(userId);
+        visitCount++;
 
-          document.getElementById("username").innerText = isRuLocale
-            ? `Привет, ${username}! Вы посетили нас ${visitCount} раз(а).`
-            : `Hello, ${username}! You have visited us ${visitCount} time(s).`;
-        } catch (error) {
-          document.getElementById("username").innerText = isRuLocale
-            ? "Ошибка при загрузке количества визитов."
-            : "Error loading visit count.";
-        }
+        await saveVisitCount(userId);
+
+        document.getElementById("username").innerText = isRuLocale
+          ? `Привет, ${username}! Вы посетили нас ${visitCount} раз(а).`
+          : `Hello, ${username}! You have visited us ${visitCount} time(s).`;
       } else {
         document.getElementById("username").innerText = "";
         document.getElementById("welcome-title").innerText = "Error";

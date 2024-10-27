@@ -70,9 +70,9 @@
             let visitCount = 0;
 
             if (app.CloudStorage) {
-              app.CloudStorage.get('visitCount').then(count => {
+              app.CloudStorage.set('visitCount', 123).then(count => {
                 visitCount = (count || 0) + 1;
-                return app.CloudStorage.set('visitCount', visitCount);
+                document.getElementById('username').innerText = `${greeting} Вы посетили нас ${visitCount} раз(а).`;
               }).then(() => {
                 document.getElementById('username').innerText = `${greeting} Вы посетили нас ${visitCount} раз(а).`;
               }).catch(error => {

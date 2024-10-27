@@ -72,6 +72,34 @@
     });
   }
 
+  async function getVisitCount(userId) {
+    try {
+      const response = await fetch(`/api/visits?userId=${userId}`);
+      if (!response.ok) throw new Error("Ошибка при получении данных");
+      const data = await response.json();
+      console.log("Получено количество визитов: ", data.visitCount);
+      return data.visitCount;
+    } catch (error) {
+      console.error("Ошибка при получении количества визитов: ", error);
+      return 0;
+    }
+  }
+
+  async function saveVisitCount(userId) {
+    try {
+      const response = await fetch(`/api/visits?userId=${userId}`, {
+        method: 'POST',
+      });
+      if (!response.ok) throw new Error("Ошибка при сохранении данных");
+      const data = await response.json();
+      console.log("Сохранено количество визитов: ", data.visitCount);
+      return data.visitCount;
+    } catch (error) {
+      console.error("Ошибка при сохранении количества визитов: ", error);
+      return 0;
+    }
+  }
+
   loadScript('https://telegram.org/js/telegram-web-app.js')
     .then(async () => {
       const app = window.Telegram.WebApp;
@@ -94,11 +122,20 @@
           document.querySelector('.button').innerText = "Refresh";
         }
 
-        let visitCount = await saveVisitCount(userId);
+        try {
+          let visitCount = await getVisitCount(userId);
+          visitCount++;
 
-        document.getElementById('username').innerText = isRuLocale
-          ? `Добро пожаловать, ${username}! Вы посетили нас ${visitCount} раз(а).`
-          : `Welcome, ${username}! You have visited us ${visitCount} time(s).`;
+          await saveVisitCount(userId);
+
+          document.getElementById('username').innerText = isRuLocale
+            ? `Добро пожаловать, ${username}! Вы посетили нас ${visitCount} раз(а).`
+            : `Welcome, ${username}! You have visited us ${visitCount} time(s).`;
+        } catch (error) {
+          document.getElementById('username').innerText = isRuLocale
+            ? "Ошибка при загрузке количества визитов."
+            : "Error loading visit count.";
+        }
 
         document.getElementById('content-container').classList.remove('hidden');
       } else {

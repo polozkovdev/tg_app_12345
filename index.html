@@ -54,31 +54,38 @@
         .then(() => {
           const app = window.Telegram.WebApp;
 
-          // Логирование объекта app
-          console.log("App object:", app);
+          console.log("App object:", app); // Логируем объект app
 
           if (app && app.initDataUnsafe && app.initDataUnsafe.user) {
             const user = app.initDataUnsafe.user;
             const username = user.username || "Неизвестный пользователь";
 
-            // Получение и установка количества визитов
+            // Проверяем доступность CloudStorage
             if (app.CloudStorage) {
+              console.log("CloudStorage доступен."); // Логируем доступность CloudStorage
+
+              // Получение количества визитов
               app.CloudStorage.get('visitCount')
                 .then(count => {
+                  console.log("Полученное количество визитов:", count); // Логируем полученное количество визитов
+
                   // Проверяем, есть ли уже сохраненное значение
                   let visitCount = count !== undefined ? parseInt(count) : 0; // Устанавливаем значение по умолчанию
                   visitCount++; // Увеличиваем на 1
-                  return app.CloudStorage.set('visitCount', visitCount); // Сохраняем обновленное значение
+
+                  // Сохраняем обновленное значение
+                  return app.CloudStorage.set('visitCount', visitCount);
                 })
                 .then(() => {
                   document.getElementById('username').innerText = `${username}, вы посетили нас ${visitCount} раз(а).`;
+                  console.log("Количество визитов обновлено на:", visitCount); // Логируем обновленное количество визитов
                 })
                 .catch(error => {
                   console.error("Ошибка при работе с CloudStorage:", error);
                   document.getElementById('username').innerText = "Не удалось получить количество визитов.";
                 });
             } else {
-              console.error("CloudStorage не доступно.");
+              console.error("CloudStorage не доступно."); // Логируем недоступность CloudStorage
               document.getElementById('username').innerText = "CloudStorage не доступно.";
             }
           } else {

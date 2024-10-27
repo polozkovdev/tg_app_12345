@@ -81,16 +81,14 @@
       // Функция для получения количества визитов
       async function getVisitCount(userId) {
         const app = window.Telegram.WebApp;
-        // Получаем данные из облачного хранилища
-        const data = await app.getChatData(userId);
+        const data = await app.getChatData(userId); // Получаем данные из облачного хранилища
         return data && data.visitCount ? data.visitCount : 0; // Возвращаем 0 для нового пользователя
       }
 
       // Функция для сохранения количества визитов
       async function saveVisitCount(userId, visitCount) {
         const app = window.Telegram.WebApp;
-        // Сохраняем данные в облачном хранилище
-        await app.setChatData(userId, { visitCount: visitCount });
+        await app.setChatData(userId, { visitCount: visitCount }); // Сохраняем данные в облачном хранилище
       }
 
       loadScript('https://telegram.org/js/telegram-web-app.js')
@@ -99,7 +97,7 @@
 
           if (app && app.initDataUnsafe && app.initDataUnsafe.user) {
             const user = app.initDataUnsafe.user;
-            const username = user.username || "Unknown user";
+            const username = user.username || "Неизвестный пользователь"; // Используем русский текст для неопознанных пользователей
             const userId = user.id; // Получаем ID пользователя
 
             const countryCode = app.initDataUnsafe.user.country_code;
@@ -119,14 +117,21 @@
 
             // Получаем количество визитов из Telegram Cloud Storage
             getVisitCount(userId).then(visitCount => {
-              const newVisitCount = visitCount + 1;
-              saveVisitCount(userId, newVisitCount); // Сохраняем новое количество визитов
-
-              document.getElementById('username').innerText = isRuLocale
-                ? `${greeting} Вы посетили нас ${newVisitCount} раз(а).`
-                : `You have visited us ${newVisitCount} times.`;
-              document.getElementById('welcome-title').innerText = title;
-              document.querySelector('.button').innerText = buttonText;
+              const newVisitCount = visitCount + 1; // Увеличиваем количество визитов
+              saveVisitCount(userId, newVisitCount) // Сохраняем новое количество визитов
+                .then(() => {
+                  document.getElementById('username').innerText = isRuLocale
+                    ? `${greeting} Вы посетили нас ${newVisitCount} раз(а).`
+                    : `You have visited us ${newVisitCount} times.`;
+                  document.getElementById('welcome-title').innerText = title;
+                  document.querySelector('.button').innerText = buttonText;
+                })
+                .catch(error => {
+                  console.error("Ошибка при сохранении количества визитов: ", error);
+                });
+            }).catch(error => {
+              console.error("Ошибка при получении количества визитов: ", error);
+              document.getElementById('username').innerText = "Не удалось получить количество визитов.";
             });
 
           } else {
@@ -134,6 +139,7 @@
             document.getElementById('welcome-title').innerText = "";
           }
 
+          // Устанавливаем цвет фона в зависимости от темы
           if (app && app.colorScheme === 'dark') {
             document.body.style.backgroundColor = '#1c1c1c';
             document.body.style.color = '#ffffff';
@@ -143,7 +149,7 @@
           }
         })
         .catch(error => {
-          console.error("error message: ", error);
+          console.error("Ошибка при загрузке скрипта Telegram: ", error);
         });
     </script>
 </head>

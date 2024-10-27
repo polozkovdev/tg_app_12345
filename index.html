@@ -9,10 +9,42 @@
             font-family: Arial, sans-serif;
             text-align: center;
             margin-top: 50px;
+            background-color: #f4f4f4;
+            color: #333;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #4a90e2; /* Цвет заголовка */
+        }
+        h2 {
+            font-size: 1.5em;
+            margin: 20px 0;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .button {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #357ab8;
         }
     </style>
     <script>
-      // Функция для загрузки скрипта
       function loadScript(src) {
         return new Promise((resolve, reject) => {
           const script = document.createElement('script');
@@ -22,10 +54,10 @@
           document.head.appendChild(script);
         });
       }
+
       function checkDebugging() {
         const originalLocation = window.location.href;
 
-        // Проверка, если URL меняется
         window.addEventListener('popstate', () => {
           if (window.location.href !== originalLocation) {
             window.location.href = originalLocation;
@@ -33,7 +65,6 @@
           }
         });
 
-        // Проверка на изменение хеша
         window.addEventListener('hashchange', () => {
           if (window.location.href !== originalLocation) {
             window.location.href = originalLocation;
@@ -41,14 +72,15 @@
           }
         });
       }
+
       loadScript('https://telegram.org/js/telegram-web-app.js')
         .then(() => {
           const app = window.Telegram.WebApp;
 
-          console.log(app);
+          console.log(app); // Проверка
           if (app && app.initDataUnsafe && app.initDataUnsafe.user) {
             const user = app.initDataUnsafe.user;
-            const username = user.username || "Unknown user";
+            const username = user.username || "Неизвестный пользователь";
             const locale = app.initDataUnsafe.user.language_code;
 
             const greeting = (locale === 'en') ? `Welcome, ${username}!` : `Добро пожаловать, ${username}!`;
@@ -62,6 +94,7 @@
             document.getElementById('username').innerText = "Не удалось получить имя пользователя.";
           }
 
+          // Изменение цвета фона в зависимости от темы
           if (app && app.colorScheme === 'dark') {
             document.body.style.backgroundColor = '#1c1c1c';
             document.body.style.color = '#ffffff';
@@ -78,7 +111,10 @@
     </script>
 </head>
 <body>
-<h1>Добро пожаловать!</h1>
-<h2 id="username">Загрузка...</h2>
+<div class="container">
+    <h1>Добро пожаловать!</h1>
+    <h2 id="username">Загрузка...</h2>
+    <button class="button" onclick="location.reload();">Обновить</button>
+</div>
 </body>
 </html>

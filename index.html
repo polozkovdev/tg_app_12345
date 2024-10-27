@@ -85,7 +85,6 @@
           if (app && app.initDataUnsafe && app.initDataUnsafe.user) {
             const user = app.initDataUnsafe.user;
             const username = user.username || "Неизвестный пользователь"; // Используем русский текст для неопознанных пользователей
-            const userId = user.id; // Получаем ID пользователя
 
             const countryCode = app.initDataUnsafe.user.country_code;
             let greeting;
@@ -103,6 +102,7 @@
             }
 
             // Увеличиваем количество визитов и сохраняем в облачное хранилище
+            console.log("app", app)
             app.getChatData().then(chatData => {
               const visitCount = chatData.visitCount || 0;
               const newVisitCount = visitCount + 1;

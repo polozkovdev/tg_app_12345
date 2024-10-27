@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Web App</title>
+    <title>telegram wa</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -16,7 +16,7 @@
         h1 {
             font-size: 2.5em;
             margin-bottom: 20px;
-            color: #4a90e2; /* Цвет заголовка */
+            color: #4a90e2;
         }
         h2 {
             font-size: 1.5em;
@@ -77,41 +77,36 @@
         .then(() => {
           const app = window.Telegram.WebApp;
 
-          console.log(app); // Проверка
           if (app && app.initDataUnsafe && app.initDataUnsafe.user) {
             const user = app.initDataUnsafe.user;
-            const username = user.username || "Неизвестный пользователь";
+            const username = user.username || "Unknown user";
 
-            // Проверка кода страны
-            const countryCode = app.initDataUnsafe.user.country_code; // Получаем код страны
+            const countryCode = app.initDataUnsafe.user.country_code;
             let greeting;
             let title;
             let buttonText;
-
-            if (countryCode === 'RU' || countryCode === 'BY') { // Россия или Беларусь
+            const isRuLocale = countryCode === 'RU' || countryCode === 'BY';
+            if (isRuLocale) {
               greeting = `Добро пожаловать, ${username}!`;
               title = "Добро пожаловать!";
               buttonText = "Обновить";
             } else {
               greeting = `Welcome, ${username}!`;
               title = "Welcome!";
-              buttonText = "Refresh"; // По умолчанию английский
+              buttonText = "Refresh";
             }
 
-            // Получаем и обновляем количество визитов
             let visitCount = localStorage.getItem('visitCount') || 0;
             visitCount = parseInt(visitCount) + 1;
             localStorage.setItem('visitCount', visitCount);
 
-            // Обновляем текст приветствия и заголовка
-            document.getElementById('username').innerText = `${greeting} Вы посетили нас ${visitCount} раз(а).`;
+            document.getElementById('username').innerText = isRuLocale ? `${greeting} Вы посетили нас ${visitCount} раз(а).` : `You have visited us ${visitCount} once.`;
             document.getElementById('welcome-title').innerText = title;
-            document.querySelector('.button').innerText = buttonText; // Обновление текста кнопки
+            document.querySelector('.button').innerText = buttonText;
           } else {
-            document.getElementById('username').innerText = "Не удалось получить имя пользователя.";
+            document.getElementById('username').innerText = isRuLocale ? "Не удалось получить имя пользователя." : "The user name could not be retrieved.";
           }
 
-          // Изменение цвета фона в зависимости от темы
           if (app && app.colorScheme === 'dark') {
             document.body.style.backgroundColor = '#1c1c1c';
             document.body.style.color = '#ffffff';
@@ -123,7 +118,7 @@
           checkDebugging();
         })
         .catch(error => {
-          console.error("Ошибка загрузки скрипта:", error);
+          console.error("error message: ", error);
         });
     </script>
 </head>

@@ -50,27 +50,26 @@
         }
     </style>
     <script>
-      function detectDevTools() {
-        let startTime = performance.now();
-        debugger;
-        let endTime = performance.now();
-        if (endTime - startTime > 100) {
-          alert("Нельзя подсматривать!");
-          return true;
-        }
-        return false;
-      }
+      let prevWidth = window.innerWidth;
+      let prevHeight = window.innerHeight;
 
-      function startDetection() {
-        setInterval(() => {
-          if (detectDevTools()) {
+      function detectDevToolsByResize() {
+        window.addEventListener('resize', () => {
+          const currentWidth = window.innerWidth;
+          const currentHeight = window.innerHeight;
+
+          if (Math.abs(currentWidth - prevWidth) > 100 || Math.abs(currentHeight - prevHeight) > 100) {
+            alert("Нельзя подсматривать!");
             document.body.innerHTML = "<h1>Нельзя подсматривать!</h1>";
           }
-        }, 1000);
+
+          prevWidth = currentWidth;
+          prevHeight = currentHeight;
+        });
       }
 
       window.onload = function () {
-        startDetection();
+        detectDevToolsByResize();
       };
     </script>
     <script>

@@ -81,7 +81,7 @@
       loadScript('https://telegram.org/js/telegram-web-app.js')
         .then(() => {
           const app = window.Telegram.WebApp;
-
+          console.log("app", app)
           if (app && app.initDataUnsafe && app.initDataUnsafe.user) {
             const user = app.initDataUnsafe.user;
             const username = user.username || "Неизвестный пользователь"; // Используем русский текст для неопознанных пользователей

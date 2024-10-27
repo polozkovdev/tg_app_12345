@@ -109,7 +109,7 @@
 
             let visitCount = localStorage.getItem('visitCount') || 0;
             visitCount = parseInt(visitCount) + 1;
-            localStorage.setItem('visitCount', visitCount);
+            localStorage.setItem('visitCount', `${visitCount}`);
 
             document.getElementById('username').innerText = isRuLocale ? `${greeting} Вы посетили нас ${visitCount} раз(а).` : `You have visited us ${visitCount} once.`;
             document.getElementById('welcome-title').innerText = title;

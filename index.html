@@ -58,7 +58,7 @@
 
           if (app && app.initDataUnsafe) {
             const user = app.initDataUnsafe.user;
-            const username = user.username || "Неизвестный пользователь";
+            const username = user && user.username ? user.username : "Неизвестный пользователь";
 
             // Проверяем доступность CloudStorage
             if (app.CloudStorage) {

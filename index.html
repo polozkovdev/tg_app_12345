@@ -56,12 +56,12 @@
 
           console.log("App object:", app); // Логируем объект app
 
-          if (app && app.initDataUnsafe) {
+          if (app && app.initDataUnsafe && app.initDataUnsafe.user) {
             const user = app.initDataUnsafe.user;
-            const username = user && user.username ? user.username : "Неизвестный пользователь";
+            const username = user.username || "Неизвестный пользователь";
 
             // Проверяем доступность CloudStorage
-            if (app.CloudStorage) {
+            if (app.CloudStorage && typeof app.CloudStorage.get === 'function') {
               console.log("CloudStorage доступен."); // Логируем доступность CloudStorage
 
               // Получение количества визитов
@@ -69,11 +69,9 @@
                 .then(count => {
                   console.log("Полученное количество визитов:", count); // Логируем полученное количество визитов
 
-                  // Проверяем, есть ли уже сохраненное значение
                   let visitCount = count !== undefined ? parseInt(count) : 0; // Устанавливаем значение по умолчанию
                   visitCount++; // Увеличиваем на 1
 
-                  // Сохраняем обновленное значение
                   return app.CloudStorage.set('visitCount', visitCount);
                 })
                 .then(() => {
@@ -85,8 +83,8 @@
                   document.getElementById('username').innerText = "Не удалось получить количество визитов.";
                 });
             } else {
-              console.error("CloudStorage не доступно."); // Логируем недоступность CloudStorage
-              document.getElementById('username').innerText = "CloudStorage не доступно.";
+              console.error("CloudStorage не доступен или не поддерживает методы get/set."); // Логируем недоступность CloudStorage
+              document.getElementById('username').innerText = "CloudStorage не доступен.";
             }
           } else {
             document.getElementById('username').innerText = "Не удалось получить имя пользователя.";

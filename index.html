@@ -81,15 +81,32 @@
           if (app && app.initDataUnsafe && app.initDataUnsafe.user) {
             const user = app.initDataUnsafe.user;
             const username = user.username || "Неизвестный пользователь";
-            const locale = app.initDataUnsafe.user.language_code;
 
-            const greeting = (locale === 'en') ? `Welcome, ${username}!` : `Добро пожаловать, ${username}!`;
+            // Проверка кода страны
+            const countryCode = app.initDataUnsafe.user.country_code; // Получаем код страны
+            let greeting;
+            let title;
+            let buttonText;
 
+            if (countryCode === 'RU' || countryCode === 'BY') { // Россия или Беларусь
+              greeting = `Добро пожаловать, ${username}!`;
+              title = "Добро пожаловать!";
+              buttonText = "Обновить";
+            } else {
+              greeting = `Welcome, ${username}!`;
+              title = "Welcome!";
+              buttonText = "Refresh"; // По умолчанию английский
+            }
+
+            // Получаем и обновляем количество визитов
             let visitCount = localStorage.getItem('visitCount') || 0;
             visitCount = parseInt(visitCount) + 1;
             localStorage.setItem('visitCount', visitCount);
 
-            document.getElementById('username').innerText = `${greeting} \n Вы посетили нас ${visitCount} раз(а).`;
+            // Обновляем текст приветствия и заголовка
+            document.getElementById('username').innerText = `${greeting} Вы посетили нас ${visitCount} раз(а).`;
+            document.getElementById('welcome-title').innerText = title;
+            document.querySelector('.button').innerText = buttonText; // Обновление текста кнопки
           } else {
             document.getElementById('username').innerText = "Не удалось получить имя пользователя.";
           }
@@ -112,7 +129,7 @@
 </head>
 <body>
 <div class="container">
-    <h1>Добро пожаловать!</h1>
+    <h1 id="welcome-title">Добро пожаловать!</h1>
     <h2 id="username">Загрузка...</h2>
     <button class="button" onclick="location.reload();">Обновить</button>
 </div>

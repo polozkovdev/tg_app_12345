@@ -48,6 +48,7 @@
       const visitCount = updateVisitCount();
       const greetingMessage = getGreetingMessage(userName, visitCount, locale);
       const greetingElement = document.getElementById('greeting');
+      console.log("greetingElement", greetingElement)
       greetingElement.textContent = greetingMessage;
 
       detectDebugging();

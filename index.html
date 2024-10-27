@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telegram Web App</title>
-    <script async src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,13 +16,13 @@
 <h1>Добро пожаловать!</h1>
 <h2 id="username">Загрузка...</h2>
 
+<script async src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
   // Инициализация Telegram Web App
   const app = window.Telegram.WebApp;
 
-  // Проверка на наличие данных о пользователе
-  console.log(app); // Добавлено для проверки
-  console.log(window.Telegram); // Добавлено для проверки
+  // Проверяем наличие данных
+  console.log(app); // Проверка
   if (app && app.initDataUnsafe && app.initDataUnsafe.user) {
     const user = app.initDataUnsafe.user;
     const username = user.username || "Неизвестный пользователь";

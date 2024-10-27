@@ -134,12 +134,14 @@
           document.querySelector(".button").innerText = "Refresh";
         }
 
-        let visitCount = await getVisitCount(userId);
-        visitCount++;
+        // let visitCount = await getVisitCount(userId);
+        // visitCount++;
+        //
+        // await saveVisitCount(userId);
+
         document.getElementById("username").innerText = isRuLocale
-          ? `Привет, ${username}! Вы посетили нас ${visitCount} раз(а).`
-          : `Hello, ${username}! You have visited us ${visitCount} time(s).`;
-        await saveVisitCount(userId);
+          ? `Привет, ${username}! Вы посетили нас ${1} раз(а).`
+          : `Hello, ${username}! You have visited us ${1} time(s).`;
       } else {
         document.getElementById("username").innerText = "";
         document.getElementById("welcome-title").innerText = "Error";

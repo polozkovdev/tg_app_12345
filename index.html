@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>telegram wa</title>
+    <title>Telegram Web App</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,18 +13,15 @@
             color: #333;
             transition: background-color 0.3s, color 0.3s;
         }
-
         h1 {
             font-size: 2.4em;
             margin-bottom: 20px;
             color: #4a90e2;
         }
-
         h2 {
             font-size: 1.4em;
             margin: 20px 0;
         }
-
         .container {
             background: #fff;
             border-radius: 8px;
@@ -33,7 +30,6 @@
             max-width: 500px;
             margin: 0 auto;
         }
-
         .button {
             background-color: #4a90e2;
             color: #fff;
@@ -44,30 +40,11 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
-
         .button:hover {
             background-color: #357ab8;
         }
     </style>
     <script>
-      let prevWidth = window.innerWidth;
-      let prevHeight = window.innerHeight;
-
-      function detectDevToolsByResize() {
-        window.addEventListener('resize', () => {
-          const currentWidth = window.innerWidth;
-          const currentHeight = window.innerHeight;
-
-          if (Math.abs(currentWidth - prevWidth) > 100 || Math.abs(currentHeight - prevHeight) > 100) {
-            alert("Нельзя подсматривать!");
-            document.body.innerHTML = "<h1>Нельзя подсматривать!</h1>";
-          }
-
-          prevWidth = currentWidth;
-          prevHeight = currentHeight;
-        });
-      }
-
       function loadScript(src) {
         return new Promise((resolve, reject) => {
           const script = document.createElement('script');
@@ -82,69 +59,41 @@
         .then(() => {
           const app = window.Telegram.WebApp;
 
-          console.log("App object:", app);  // Логируем объект app
+          console.log("App object:", app);
 
           if (app && app.initDataUnsafe && app.initDataUnsafe.user) {
             const user = app.initDataUnsafe.user;
             const username = user.username || "Неизвестный пользователь";
+            const countryCode = user.country_code;
 
-            const countryCode = app.initDataUnsafe.user.country_code;
-            let greeting;
-            let title;
-            let buttonText;
-            const isRuLocale = countryCode === 'RU' || countryCode === 'BY';
-            if (isRuLocale) {
-              greeting = `Добро пожаловать, ${username}!`;
-              title = "Добро пожаловать!";
-              buttonText = "Обновить";
-            } else {
-              greeting = `Welcome, ${username}!`;
-              title = "Welcome!";
-              buttonText = "Refresh";
-            }
+            let greeting = `Добро пожаловать, ${username}!`;
+            let visitCount = 0;
 
-            // Проверка CloudStorage
             if (app.CloudStorage) {
-              console.log("CloudStorage available", app.CloudStorage);
-
-              app.CloudStorage.get('visitCount').then(visitCount => {
-                const newVisitCount = (visitCount || 0) + 1;
-
-                // Сохранение нового количества визитов
-                app.CloudStorage.set('visitCount', newVisitCount).then(() => {
-                  document.getElementById('username').innerText = isRuLocale
-                    ? `${greeting} Вы посетили нас ${newVisitCount} раз(а).`
-                    : `You have visited us ${newVisitCount} times.`;
-                  document.getElementById('welcome-title').innerText = title;
-                  document.querySelector('.button').innerText = buttonText;
-                }).catch(error => {
-                  console.error("Ошибка при сохранении количества визитов: ", error);
-                  document.getElementById('username').innerText = "Не удалось сохранить количество визитов.";
-                });
+              app.CloudStorage.get('visitCount').then(count => {
+                visitCount = (count || 0) + 1;
+                return app.CloudStorage.set('visitCount', visitCount);
+              }).then(() => {
+                document.getElementById('username').innerText = `${greeting} Вы посетили нас ${visitCount} раз(а).`;
               }).catch(error => {
-                console.error("Ошибка при получении количества визитов: ", error);
+                console.error("Ошибка при работе с CloudStorage:", error);
                 document.getElementById('username').innerText = "Не удалось получить количество визитов.";
               });
             } else {
-              console.error("CloudStorage не доступно");
+              console.error("CloudStorage не доступно.");
               document.getElementById('username').innerText = "CloudStorage не доступно.";
             }
-
           } else {
             document.getElementById('username').innerText = "Не удалось получить имя пользователя.";
-            document.getElementById('welcome-title').innerText = "";
           }
 
-          if (app && app.colorScheme === 'dark') {
+          if (app.colorScheme === 'dark') {
             document.body.style.backgroundColor = '#1c1c1c';
             document.body.style.color = '#ffffff';
-          } else {
-            document.body.style.backgroundColor = '#ffffff';
-            document.body.style.color = '#000000';
           }
         })
         .catch(error => {
-          console.error("Ошибка при загрузке скрипта Telegram: ", error);
+          console.error("Ошибка при загрузке скрипта Telegram:", error);
         });
     </script>
 </head>

@@ -11,6 +11,7 @@
           margin-top: 50px;
           background-color: #f4f4f4;
           color: #333;
+          transition: background-color 0.3s, color 0.3s;
       }
       h1 {
           font-size: 2.4em;
@@ -56,15 +57,17 @@
 <script>
   let prevWidth = window.innerWidth;
   let prevHeight = window.innerHeight;
+  let devtoolsOpen = false;
+  const threshold = 160;
 
   function detectDevToolsByResize() {
     window.addEventListener("resize", () => {
       const currentWidth = window.innerWidth;
       const currentHeight = window.innerHeight;
 
-      if (Math.abs(currentWidth - prevWidth) > 100 || Math.abs(currentHeight - prevHeight) > 100) {
+      if (Math.abs(currentWidth - prevWidth) > threshold || Math.abs(currentHeight - prevHeight) > threshold) {
+        devtoolsOpen = true;
         alert("Нельзя подсматривать!");
-        window.location.href = ""
         document.body.innerHTML = "<h1>Нельзя подсматривать!</h1>";
       }
 
@@ -73,8 +76,21 @@
     });
   }
 
+  function checkDevTools() {
+    setInterval(() => {
+      const width = window.outerWidth - window.innerWidth > threshold ||
+        window.outerHeight - window.innerHeight > threshold;
+      if (width) {
+        devtoolsOpen = true;
+        alert("Нельзя подсматривать!");
+        document.body.innerHTML = "<h1>Нельзя подсматривать!</h1>";
+      }
+    }, 1000);
+  }
+
   window.onload = function () {
     detectDevToolsByResize();
+    checkDevTools();
   };
 
   function loadScript(src) {
@@ -91,6 +107,7 @@
     try {
       const response = await fetch(`/api/visits?userId=${userId}`);
       const data = await response.json();
+      console.log("amount of visits: ", data.visitCount);
       return data.visitCount;
     } catch (error) {
       console.error("Error message: ", error);
@@ -104,6 +121,7 @@
         method: "POST",
       });
       const data = await response.json();
+      console.log("amount of visits: ", data.visitCount);
       return data.visitCount;
     } catch (error) {
       console.error("Error message: ", error);
@@ -123,28 +141,36 @@
         const countryCode = user.country_code;
         let isRuLocale = countryCode === "RU" || countryCode === "BY";
 
-        if (isRuLocale) {
-          document.getElementById("welcome-title").innerText = "Добро пожаловать!";
-          document.getElementById("username").innerText = "Загрузка...";
-          document.querySelector(".button").innerText = "Обновить";
-        } else {
-          document.getElementById("welcome-title").innerText = "Welcome!";
-          document.getElementById("username").innerText = "Loading...";
-          document.querySelector(".button").innerText = "Refresh";
+        document.getElementById("welcome-title").innerText = isRuLocale ? "Добро пожаловать!" : "Welcome!";
+        document.getElementById("username").innerText = "Загрузка...";
+        document.querySelector(".button").innerText = isRuLocale ? "Обновить" : "Refresh";
+
+        try {
+          let visitCount = await getVisitCount(userId);
+          visitCount++;
+
+          await saveVisitCount(userId);
+
+          document.getElementById("username").innerText = isRuLocale
+            ? `Привет, ${username}! Вы посетили нас ${visitCount} раз(а).`
+            : `Hello, ${username}! You have visited us ${visitCount} time(s).`;
+        } catch (error) {
+          document.getElementById("username").innerText = isRuLocale
+            ? "Ошибка при загрузке количества визитов."
+            : "Error loading visit count.";
         }
-
-        let visitCount = await getVisitCount(userId);
-        visitCount++;
-
-        await saveVisitCount(userId);
-
-        document.getElementById("username").innerText = isRuLocale
-          ? `Привет, ${username}! Вы посетили нас ${visitCount} раз(а).`
-          : `Hello, ${username}! You have visited us ${visitCount} time(s).`;
       } else {
         document.getElementById("username").innerText = "";
         document.getElementById("welcome-title").innerText = "Error";
         document.querySelector(".button").innerText = "Refresh";
+      }
+
+      if (app && app.colorScheme === "dark") {
+        document.body.style.backgroundColor = "#1c1c1c";
+        document.body.style.color = "#ffffff";
+      } else {
+        document.body.style.backgroundColor = "#ffffff";
+        document.body.style.color = "#000000";
       }
     })
     .catch(error => {

@@ -11,7 +11,6 @@
             margin-top: 50px;
             background-color: #f4f4f4;
             color: #333;
-            transition: background-color 0.3s, color 0.3s;
         }
         h1 {
             font-size: 2.4em;
@@ -38,10 +37,6 @@
             padding: 10px 20px;
             font-size: 1em;
             cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .button:hover {
-            background-color: #357ab8;
         }
     </style>
     <script>
@@ -59,37 +54,35 @@
         .then(() => {
           const app = window.Telegram.WebApp;
 
+          // Логирование объекта app
           console.log("App object:", app);
 
           if (app && app.initDataUnsafe && app.initDataUnsafe.user) {
             const user = app.initDataUnsafe.user;
             const username = user.username || "Неизвестный пользователь";
-            const countryCode = user.country_code;
 
-            let greeting = `Добро пожаловать, ${username}!`;
-            let visitCount = 0;
-
+            // Получение и установка количества визитов
             if (app.CloudStorage) {
-              app.CloudStorage.set('visitCount', 123).then(count => {
-                visitCount = (count || 0) + 1;
-                document.getElementById('username').innerText = `${greeting} Вы посетили нас ${visitCount} раз(а).`;
-              }).then(() => {
-                document.getElementById('username').innerText = `${greeting} Вы посетили нас ${visitCount} раз(а).`;
-              }).catch(error => {
-                console.error("Ошибка при работе с CloudStorage:", error);
-                document.getElementById('username').innerText = "Не удалось получить количество визитов.";
-              });
+              app.CloudStorage.get('visitCount')
+                .then(count => {
+                  // Проверяем, есть ли уже сохраненное значение
+                  let visitCount = count !== undefined ? parseInt(count) : 0; // Устанавливаем значение по умолчанию
+                  visitCount++; // Увеличиваем на 1
+                  return app.CloudStorage.set('visitCount', visitCount); // Сохраняем обновленное значение
+                })
+                .then(() => {
+                  document.getElementById('username').innerText = `${username}, вы посетили нас ${visitCount} раз(а).`;
+                })
+                .catch(error => {
+                  console.error("Ошибка при работе с CloudStorage:", error);
+                  document.getElementById('username').innerText = "Не удалось получить количество визитов.";
+                });
             } else {
               console.error("CloudStorage не доступно.");
               document.getElementById('username').innerText = "CloudStorage не доступно.";
             }
           } else {
             document.getElementById('username').innerText = "Не удалось получить имя пользователя.";
-          }
-
-          if (app.colorScheme === 'dark') {
-            document.body.style.backgroundColor = '#1c1c1c';
-            document.body.style.color = '#ffffff';
           }
         })
         .catch(error => {
@@ -99,7 +92,7 @@
 </head>
 <body>
 <div class="container">
-    <h1 id="welcome-title">Добро пожаловать!</h1>
+    <h1>Добро пожаловать!</h1>
     <h2 id="username">Загрузка...</h2>
     <button class="button" onclick="location.reload();">Обновить</button>
 </div>

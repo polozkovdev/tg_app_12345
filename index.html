@@ -81,10 +81,12 @@
       loadScript('https://telegram.org/js/telegram-web-app.js')
         .then(() => {
           const app = window.Telegram.WebApp;
-          console.log("app", app)
+
+          console.log("App object:", app);  // Логируем объект app
+
           if (app && app.initDataUnsafe && app.initDataUnsafe.user) {
             const user = app.initDataUnsafe.user;
-            const username = user.username || "Неизвестный пользователь"; // Используем русский текст для неопознанных пользователей
+            const username = user.username || "Неизвестный пользователь";
 
             const countryCode = app.initDataUnsafe.user.country_code;
             let greeting;
@@ -101,34 +103,38 @@
               buttonText = "Refresh";
             }
 
-            // Увеличиваем количество визитов и сохраняем в облачное хранилище
-            console.log("app", app)
-            app.getChatData().then(chatData => {
-              const visitCount = chatData.visitCount || 0;
-              const newVisitCount = visitCount + 1;
+            // Проверка CloudStorage
+            if (app.CloudStorage) {
+              console.log("CloudStorage available", app.CloudStorage);
 
-              // Сохранение нового количества визитов
-              app.setChatData({ visitCount: newVisitCount }).then(() => {
-                document.getElementById('username').innerText = isRuLocale
-                  ? `${greeting} Вы посетили нас ${newVisitCount} раз(а).`
-                  : `You have visited us ${newVisitCount} times.`;
-                document.getElementById('welcome-title').innerText = title;
-                document.querySelector('.button').innerText = buttonText;
+              app.CloudStorage.get('visitCount').then(visitCount => {
+                const newVisitCount = (visitCount || 0) + 1;
+
+                // Сохранение нового количества визитов
+                app.CloudStorage.set('visitCount', newVisitCount).then(() => {
+                  document.getElementById('username').innerText = isRuLocale
+                    ? `${greeting} Вы посетили нас ${newVisitCount} раз(а).`
+                    : `You have visited us ${newVisitCount} times.`;
+                  document.getElementById('welcome-title').innerText = title;
+                  document.querySelector('.button').innerText = buttonText;
+                }).catch(error => {
+                  console.error("Ошибка при сохранении количества визитов: ", error);
+                  document.getElementById('username').innerText = "Не удалось сохранить количество визитов.";
+                });
               }).catch(error => {
-                console.error("Ошибка при сохранении количества визитов: ", error);
-                document.getElementById('username').innerText = "Не удалось сохранить количество визитов.";
+                console.error("Ошибка при получении количества визитов: ", error);
+                document.getElementById('username').innerText = "Не удалось получить количество визитов.";
               });
-            }).catch(error => {
-              console.error("Ошибка при получении количества визитов: ", error);
-              document.getElementById('username').innerText = "Не удалось получить количество визитов.";
-            });
+            } else {
+              console.error("CloudStorage не доступно");
+              document.getElementById('username').innerText = "CloudStorage не доступно.";
+            }
 
           } else {
             document.getElementById('username').innerText = "Не удалось получить имя пользователя.";
             document.getElementById('welcome-title').innerText = "";
           }
 
-          // Устанавливаем цвет фона в зависимости от темы
           if (app && app.colorScheme === 'dark') {
             document.body.style.backgroundColor = '#1c1c1c';
             document.body.style.color = '#ffffff';

@@ -1,68 +1,59 @@
-window.Telegram.WebApp.ready();
+const TelegramBot = require('node-telegram-bot-api');
+const express = require('express');
+const bodyParser = require('body-parser');
+const sqlite3 = require('sqlite3').verbose();
 
-const user = window.Telegram.WebApp.initDataUnsafe?.user;
-const locale = user?.language_code || 'en';
-const userId = user?.id;
-const userName = user?.first_name || "User";
+// Создаем и запускаем бота
+const token = 'ВАШ_ТЕЛЕГРАМ_ТОКЕН';
+const bot = new TelegramBot(token, {polling: true});
 
-const botToken = '7665863259:AAHMSDEXaAyHVtjwu6pAufLLiWJsP9kos5U';
+// Инициализация базы данных SQLite
+const db = new sqlite3.Database(':memory:');
 
-function sendMessageToUser(message) {
-  const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+db.serialize(() => {
+  db.run("CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY, username TEXT, visit_count INTEGER)");
+});
 
-  fetch(apiUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      chat_id: userId,
-      text: message
-    })
-  })
-    .then(response => response.json())
-    .then(data => {
-      if (data.ok) {
-        console.log('Message sent:', data);
-      } else {
-        console.error('Error sending message:', data);
-      }
-    })
-    .catch(error => console.error('Error:', error));
-}
+const app = express();
+app.use(bodyParser.json());
 
-function getGreetingMessage(name, visits, locale) {
-  if (locale === 'ru' || locale === 'by') {
-    return `Привет, ${name}! Вы посетили эту страницу ${visits} раз(а).`;
-  }
-  return `Hello, ${name}! You have visited this page ${visits} times.`;
-}
+// Эндпоинт для хранения данных пользователя
+app.post('/store_user_data', (req, res) => {
+  const { user_id, username } = req.body;
 
-function detectDebugging() {
-  if (window.location.search || window.location.hash) {
-    window.history.pushState({}, document.title, window.location.pathname);
+  db.get("SELECT * FROM users WHERE user_id = ?", [user_id], (err, row) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Ошибка сервера' });
+      return;
+    }
 
-    const message = locale === 'ru' ? 'Нельзя подсматривать!' : 'No peeking!';
-    alert(message);
-  }
-}
+    if (row) {
+      // Обновляем количество посещений, если пользователь уже существует
+      const newVisitCount = row.visit_count + 1;
+      db.run("UPDATE users SET visit_count = ? WHERE user_id = ?", [newVisitCount, user_id], (err) => {
+        if (err) {
+          console.error(err);
+          res.status(500).json({ error: 'Ошибка обновления данных' });
+          return;
+        }
+        res.json({ visit_count: newVisitCount });
+      });
+    } else {
+      // Добавляем нового пользователя
+      db.run("INSERT INTO users (user_id, username, visit_count) VALUES (?, ?, ?)", [user_id, username, 1], (err) => {
+        if (err) {
+          console.error(err);
+          res.status(500).json({ error: 'Ошибка добавления данных' });
+          return;
+        }
+        res.json({ visit_count: 1 });
+      });
+    }
+  });
+});
 
-function main() {
-  if (user && userId) {
-    let visitCount = localStorage.getItem('visitCount') || 0;
-    visitCount = parseInt(visitCount) + 1;
-
-    localStorage.setItem('visitCount', visitCount);
-
-    const greetingMessage = getGreetingMessage(userName, visitCount, locale);
-
-    const greetingElement = document.getElementById('greeting');
-    greetingElement.textContent = greetingMessage;
-
-    sendMessageToUser(greetingMessage);
-
-    detectDebugging();
-  }
-}
-
-main();
+// Запуск сервера
+app.listen(3000, () => {
+  console.log('Server started on port 3000');
+});

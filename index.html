@@ -13,26 +13,30 @@
             color: #333;
             transition: background-color 0.3s, color 0.3s;
         }
+
         h1 {
-            font-size: 2.5em;
+            font-size: 2.4em;
             margin-bottom: 20px;
             color: #4a90e2;
         }
+
         h2 {
-            font-size: 1.5em;
+            font-size: 1.4em;
             margin: 20px 0;
         }
+
         .container {
-            background: white;
+            background: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 40px;
             max-width: 500px;
             margin: 0 auto;
         }
+
         .button {
             background-color: #4a90e2;
-            color: white;
+            color: #fff;
             border: none;
             border-radius: 5px;
             padding: 10px 20px;
@@ -40,6 +44,7 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
+
         .button:hover {
             background-color: #357ab8;
         }
@@ -47,11 +52,9 @@
     <script>
       function detectDevTools() {
         let startTime = performance.now();
-
-        debugger; // это задержит выполнение, если DevTools открыты
-
+        debugger;
         let endTime = performance.now();
-        if (endTime - startTime > 100) { // если задержка больше 100 мс, вероятно, DevTools открыты
+        if (endTime - startTime > 100) {
           alert("Нельзя подсматривать!");
           return true;
         }
@@ -63,7 +66,7 @@
           if (detectDevTools()) {
             document.body.innerHTML = "<h1>Нельзя подсматривать!</h1>";
           }
-        }, 1000); // проверяем каждую секунду
+        }, 1000);
       }
 
       window.onload = function () {
@@ -78,24 +81,6 @@
           script.onload = resolve;
           script.onerror = reject;
           document.head.appendChild(script);
-        });
-      }
-
-      function checkDebugging() {
-        const originalLocation = window.location.href;
-
-        window.addEventListener('popstate', () => {
-          if (window.location.href !== originalLocation) {
-            window.location.href = originalLocation;
-            alert("Нельзя подсматривать!");
-          }
-        });
-
-        window.addEventListener('hashchange', () => {
-          if (window.location.href !== originalLocation) {
-            window.location.href = originalLocation;
-            alert("Нельзя подсматривать!");
-          }
         });
       }
 
@@ -130,7 +115,7 @@
             document.getElementById('welcome-title').innerText = title;
             document.querySelector('.button').innerText = buttonText;
           } else {
-            document.getElementById('username').innerText = isRuLocale ? "Не удалось получить имя пользователя." : "The user name could not be retrieved.";
+            document.getElementById('username').innerText = "The user name could not be retrieved.";
           }
 
           if (app && app.colorScheme === 'dark') {
@@ -140,8 +125,6 @@
             document.body.style.backgroundColor = '#ffffff';
             document.body.style.color = '#000000';
           }
-
-          checkDebugging();
         })
         .catch(error => {
           console.error("error message: ", error);

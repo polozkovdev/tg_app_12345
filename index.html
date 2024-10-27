@@ -21,12 +21,14 @@
   // Инициализация Telegram Web App
   const app = window.Telegram.WebApp;
 
-  // Получение имени пользователя
-  const user = app.initDataUnsafe.user;
-  const username = user ? user.username : "Неизвестный пользователь";
-
-  // Отображение имени пользователя на странице
-  document.getElementById('username').innerText = `Ваше имя пользователя: ${username}`;
+  // Проверка, что данные о пользователе получены
+  if (app.initDataUnsafe && app.initDataUnsafe.user) {
+    const user = app.initDataUnsafe.user;
+    const username = user.username || "Неизвестный пользователь"; // Если нет username, то выводим это
+    document.getElementById('username').innerText = `Ваше имя пользователя: ${username}`;
+  } else {
+    document.getElementById('username').innerText = "Не удалось получить имя пользователя.";
+  }
 
   // Дополнительно: изменение цвета фона в зависимости от темы
   if (app.colorScheme === 'dark') {

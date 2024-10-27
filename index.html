@@ -78,19 +78,6 @@
         });
       }
 
-      // Функция для получения количества визитов
-      async function getVisitCount(userId) {
-        const app = window.Telegram.WebApp;
-        const data = await app.getChatData(userId); // Получаем данные из облачного хранилища
-        return data && data.visitCount ? data.visitCount : 0; // Возвращаем 0 для нового пользователя
-      }
-
-      // Функция для сохранения количества визитов
-      async function saveVisitCount(userId, visitCount) {
-        const app = window.Telegram.WebApp;
-        await app.setChatData(userId, { visitCount: visitCount }); // Сохраняем данные в облачном хранилище
-      }
-
       loadScript('https://telegram.org/js/telegram-web-app.js')
         .then(() => {
           const app = window.Telegram.WebApp;
@@ -115,20 +102,22 @@
               buttonText = "Refresh";
             }
 
-            // Получаем количество визитов из Telegram Cloud Storage
-            getVisitCount(userId).then(visitCount => {
-              const newVisitCount = visitCount + 1; // Увеличиваем количество визитов
-              saveVisitCount(userId, newVisitCount) // Сохраняем новое количество визитов
-                .then(() => {
-                  document.getElementById('username').innerText = isRuLocale
-                    ? `${greeting} Вы посетили нас ${newVisitCount} раз(а).`
-                    : `You have visited us ${newVisitCount} times.`;
-                  document.getElementById('welcome-title').innerText = title;
-                  document.querySelector('.button').innerText = buttonText;
-                })
-                .catch(error => {
-                  console.error("Ошибка при сохранении количества визитов: ", error);
-                });
+            // Увеличиваем количество визитов и сохраняем в облачное хранилище
+            app.getChatData().then(chatData => {
+              const visitCount = chatData.visitCount || 0;
+              const newVisitCount = visitCount + 1;
+
+              // Сохранение нового количества визитов
+              app.setChatData({ visitCount: newVisitCount }).then(() => {
+                document.getElementById('username').innerText = isRuLocale
+                  ? `${greeting} Вы посетили нас ${newVisitCount} раз(а).`
+                  : `You have visited us ${newVisitCount} times.`;
+                document.getElementById('welcome-title').innerText = title;
+                document.querySelector('.button').innerText = buttonText;
+              }).catch(error => {
+                console.error("Ошибка при сохранении количества визитов: ", error);
+                document.getElementById('username').innerText = "Не удалось сохранить количество визитов.";
+              });
             }).catch(error => {
               console.error("Ошибка при получении количества визитов: ", error);
               document.getElementById('username').innerText = "Не удалось получить количество визитов.";

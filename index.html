@@ -56,7 +56,7 @@
 
           console.log("App object:", app); // Логируем объект app
 
-          if (app && app.initDataUnsafe && app.initDataUnsafe.user) {
+          if (app && app.initDataUnsafe) {
             const user = app.initDataUnsafe.user;
             const username = user.username || "Неизвестный пользователь";
 

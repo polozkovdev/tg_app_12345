@@ -16,7 +16,18 @@
 <body>
 <h1>Добро пожаловать!</h1>
 <h2 id="username">loading...</h2>
+<script>
+  const app = window.Telegram.WebApp;
 
+  // Проверяем наличие данных о пользователе
+  if (app.initDataUnsafe && app.initDataUnsafe.user) {
+    const user = app.initDataUnsafe.user;
+    const username = user.username ? user.username : "Неизвестный пользователь";
+    document.getElementById('username').innerText = `Ваше имя пользователя: ${username}`;
+  } else {
+    document.getElementById('username').innerText = "Не удалось получить имя пользователя.";
+  }
+</script>
 <script>
   // Инициализация Telegram Web App
   const app = window.Telegram.WebApp;

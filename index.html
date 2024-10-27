@@ -89,7 +89,7 @@
             visitCount = parseInt(visitCount) + 1;
             localStorage.setItem('visitCount', visitCount);
 
-            document.getElementById('username').innerText = `${greeting} Вы посетили нас ${visitCount} раз(а).`;
+            document.getElementById('username').innerText = `${greeting} \n Вы посетили нас ${visitCount} раз(а).`;
           } else {
             document.getElementById('username').innerText = "Не удалось получить имя пользователя.";
           }

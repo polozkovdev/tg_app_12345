@@ -1,112 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telegram Web App</title>
     <script async src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+    </style>
 </head>
 <body>
-<h1 id="greeting">Loading...</h1>
+<h1>Добро пожаловать!</h1>
+<h2 id="username">Загрузка...</h2>
 
 <script>
-  // Проверяем, есть ли объект Telegram WebApp
-  if (typeof window.Telegram !== 'undefined') {
-    // Инициализация Web App
-    const telegram = window.Telegram.WebApp;
-    telegram.ready();
+  // Инициализация Telegram Web App
+  const app = window.Telegram.WebApp;
 
-    telegram.ready();
+  // Получение имени пользователя
+  const user = app.initDataUnsafe.user;
+  const username = user ? user.username : "Неизвестный пользователь";
 
-    const user = telegram.initDataUnsafe?.user;
-    const locale = user?.language_code || 'en';
-    const userName = user?.first_name || "User";
-    const userId = user?.id;
+  // Отображение имени пользователя на странице
+  document.getElementById('username').innerText = `Ваше имя пользователя: ${username}`;
 
-    // Функция для работы с локальным хранилищем
-    function getVisitCount() {
-      let visitCount = localStorage.getItem('visitCount') || 0;
-      return parseInt(visitCount);
-    }
-
-    function updateVisitCount() {
-      let visitCount = getVisitCount();
-      visitCount += 1;
-      localStorage.setItem('visitCount', visitCount);
-      return visitCount;
-    }
-
-    // Приветственное сообщение
-    function getGreetingMessage(name, visits, locale) {
-      if (locale === 'ru' || locale === 'by') {
-        return `Привет, ${name}! Вы посетили эту страницу ${visits} раз(а).`;
-      }
-      return `Hello, ${name}! You have visited this page ${visits} times.`;
-    }
-
-    // Определение, не пытается ли пользователь дебажить
-    function detectDebugging() {
-      if (window.location.search || window.location.hash) {
-        window.history.pushState({}, document.title, window.location.pathname);  // Очистка адресной строки
-        const message = locale === 'ru' ? 'Нельзя подсматривать!' : 'No peeking!';
-        alert(message);  // Сообщение
-      }
-    }
-
-    // Отправка данных визитов на сервер через бота
-    async function sendVisitCountToBot(visitCount) {
-      const BOT_TOKEN = '7502059654:AAGuSQwypiY4atu8sS4wuSBU50D1R17YQQE';
-      const CHAT_ID = userId;
-
-      const message = `User ${userName} has visited ${visitCount} times.`;
-
-      const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-      const data = {
-        chat_id: CHAT_ID,
-        text: message,
-      };
-
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to send visit count to bot');
-        }
-
-        const result = await response.json();
-        console.log('Bot response:', result);
-      } catch (error) {
-        console.error('Error:', error);
-      }
-    }
-
-    // Основная функция
-    function main() {
-      if (user && userId) {
-        const visitCount = updateVisitCount();  // Обновляем количество визитов
-        const greetingMessage = getGreetingMessage(userName, visitCount, locale);
-        const greetingElement = document.getElementById('greeting');
-        greetingElement.textContent = greetingMessage;  // Выводим сообщение
-
-        detectDebugging();  // Проверяем на дебаг
-
-        sendVisitCountToBot(visitCount);  // Отправляем количество визитов боту
-      } else {
-        document.getElementById('greeting').textContent = 'Failed to load user data.';
-      }
-    }
-
-    main();  // Запускаем приложение
-
+  // Дополнительно: изменение цвета фона в зависимости от темы
+  if (app.colorScheme === 'dark') {
+    document.body.style.backgroundColor = '#1c1c1c';
+    document.body.style.color = '#ffffff';
   } else {
-    // Если приложение открыто вне Telegram Web App
-    document.getElementById('greeting').textContent = 'Please open this app inside Telegram WebApp.';
+    document.body.style.backgroundColor = '#ffffff';
+    document.body.style.color = '#000000';
   }
 </script>
 </body>

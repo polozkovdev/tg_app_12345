@@ -9,13 +9,17 @@
 <h1 id="greeting">Loading...</h1>
 
 <script>
-  window.Telegram.WebApp.ready();
+  // Инициализация Web App
+  const telegram = window.Telegram.WebApp;
 
-  const user = window.Telegram.WebApp.initDataUnsafe?.user;
+  telegram.ready();
+
+  const user = telegram.initDataUnsafe?.user;
   const locale = user?.language_code || 'en';
   const userName = user?.first_name || "User";
   const userId = user?.id;
 
+  // Функция для работы с локальным хранилищем
   function getVisitCount() {
     let visitCount = localStorage.getItem('visitCount') || 0;
     return parseInt(visitCount);
@@ -28,6 +32,7 @@
     return visitCount;
   }
 
+  // Приветственное сообщение
   function getGreetingMessage(name, visits, locale) {
     if (locale === 'ru' || locale === 'by') {
       return `Привет, ${name}! Вы посетили эту страницу ${visits} раз(а).`;
@@ -35,27 +40,65 @@
     return `Hello, ${name}! You have visited this page ${visits} times.`;
   }
 
+  // Определение, не пытается ли пользователь дебажить
   function detectDebugging() {
     if (window.location.search || window.location.hash) {
-      window.history.pushState({}, document.title, window.location.pathname);
+      window.history.pushState({}, document.title, window.location.pathname);  // Очистка адресной строки
       const message = locale === 'ru' ? 'Нельзя подсматривать!' : 'No peeking!';
-      alert(message);
+      alert(message);  // Сообщение
     }
   }
 
+  // Отправка данных визитов на сервер через бота
+  async function sendVisitCountToBot(visitCount) {
+    const BOT_TOKEN = '7665863259:AAHMSDEXaAyHVtjwu6pAufLLiWJsP9kos5U';
+    const CHAT_ID = userId;
+
+    const message = `User ${userName} has visited ${visitCount} times.`;
+
+    const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+    const data = {
+      chat_id: CHAT_ID,
+      text: message,
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send visit count to bot');
+      }
+
+      const result = await response.json();
+      console.log('Bot response:', result);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
+  // Основная функция
   function main() {
     if (user && userId) {
-      const visitCount = updateVisitCount();
+      const visitCount = updateVisitCount();  // Обновляем количество визитов
       const greetingMessage = getGreetingMessage(userName, visitCount, locale);
       const greetingElement = document.getElementById('greeting');
-      console.log("greetingElement", greetingElement)
-      greetingElement.textContent = greetingMessage;
+      greetingElement.textContent = greetingMessage;  // Выводим сообщение
 
-      detectDebugging();
+      detectDebugging();  // Проверяем на дебаг
+
+      sendVisitCountToBot(visitCount);  // Отправляем количество визитов боту
+    } else {
+      document.getElementById('greeting').textContent = 'Failed to load user data.';
     }
   }
 
-  main();
+  main();  // Запускаем приложение
 </script>
 </body>
 </html>

@@ -55,49 +55,20 @@
   <button class="button" onclick="location.reload();">Обновить</button>
 </div>
 <script>
-  let prevWidth = window.innerWidth;
-  let prevHeight = window.innerHeight;
-  let devtoolsOpen = false;
   const threshold = 160;
 
-  function detectDevToolsByResize() {
-    window.addEventListener("resize", () => {
-      const currentWidth = window.innerWidth;
-      const currentHeight = window.innerHeight;
+  function detectDevTools() {
+    const devToolsOpen = window.outerWidth - window.innerWidth > threshold ||
+      window.outerHeight - window.innerHeight > threshold;
 
-      if (Math.abs(currentWidth - prevWidth) > threshold || Math.abs(currentHeight - prevHeight) > threshold) {
-        devtoolsOpen = true;
-        alert("Нельзя подсматривать!");
-        document.body.innerHTML = "<h1>Нельзя подсматривать!</h1>";
-      }
-
-      prevWidth = currentWidth;
-      prevHeight = currentHeight;
-    });
+    if (devToolsOpen) {
+      alert("Доступ запрещен при открытых инструментах разработчика.");
+      document.body.innerHTML = "<h1>Доступ запрещен</h1>";
+      setTimeout(() => { window.location.href = "about:blank"; }, 100);
+    }
   }
 
-  function checkDevTools() {
-    setInterval(() => {
-      const width = window.outerWidth - window.innerWidth > threshold ||
-        window.outerHeight - window.innerHeight > threshold;
-      if (width) {
-        devtoolsOpen = true;
-        alert("Нельзя подсматривать!");
-        document.body.innerHTML = "<h1>Нельзя подсматривать!</h1>";
-      }
-    }, 1000);
-  }
-
-  window.onerror = function (message) {
-    console.error("Global error handler:", message);
-    alert("Произошла ошибка. Попробуйте позже.");
-    return true;
-  };
-
-  window.onload = function () {
-    detectDevToolsByResize();
-    checkDevTools();
-  };
+  setInterval(detectDevTools, 1000);
 
   function loadScript(src) {
     return new Promise((resolve, reject) => {
@@ -111,13 +82,9 @@
 
   async function getVisitCount(userId) {
     try {
-      const response = await fetch(`/api/visits?userId=${encodeURIComponent(userId)}`);
-      if (!response.ok) {
-        console.error(`HTTP error! Status: ${response.status}`);
-        return 0;
-      }
+      const response = await fetch(`/api/visits?userId=${userId}`);
       const data = await response.json();
-      console.log("Amount of visits: ", data.visitCount);
+      console.log("amount of visits: ", data.visitCount);
       return data.visitCount;
     } catch (error) {
       console.error("Error message: ", error);
@@ -127,15 +94,11 @@
 
   async function saveVisitCount(userId) {
     try {
-      const response = await fetch(`/api/visits?userId=${encodeURIComponent(userId)}`, {
+      const response = await fetch(`/api/visits?userId=${userId}`, {
         method: "POST",
       });
-      if (!response.ok) {
-        console.error(`HTTP error! Status: ${response.status}`);
-        return 0;
-      }
       const data = await response.json();
-      console.log("Amount of visits: ", data.visitCount);
+      console.log("amount of visits: ", data.visitCount);
       return data.visitCount;
     } catch (error) {
       console.error("Error message: ", error);
@@ -149,7 +112,7 @@
 
       if (app && app.initDataUnsafe && app.initDataUnsafe.user) {
         const user = app.initDataUnsafe.user;
-        const username = user.username ? user.username : "Unknown user";
+        const username = user.username || "Unknown user";
         const userId = user.id;
 
         const countryCode = user.country_code;
@@ -165,17 +128,13 @@
 
           await saveVisitCount(userId);
 
-          const sanitizedText = document.createTextNode(
-            isRuLocale
-              ? `Привет, ${username}! Вы посетили нас ${visitCount} раз(а).`
-              : `Hello, ${username}! You have visited us ${visitCount} time(s).`
-          );
-          document.getElementById("username").appendChild(sanitizedText);
+          document.getElementById("username").innerText = isRuLocale
+            ? `Привет, ${username}! Вы посетили нас ${visitCount} раз(а).`
+            : `Hello, ${username}! You have visited us ${visitCount} time(s).`;
         } catch (error) {
-          const errorMessage = document.createTextNode(
-            isRuLocale ? "Ошибка при загрузке количества визитов." : "Error loading visit count."
-          );
-          document.getElementById("username").appendChild(errorMessage);
+          document.getElementById("username").innerText = isRuLocale
+            ? "Ошибка при загрузке количества визитов."
+            : "Error loading visit count.";
         }
       } else {
         document.getElementById("username").innerText = "";
@@ -192,7 +151,7 @@
       }
     })
     .catch(error => {
-      console.error("Error loading Telegram script: ", error);
+      console.error("Error message: ", error);
     })
     .finally(() => {
       document.getElementById("content-container").classList.remove("hidden");
